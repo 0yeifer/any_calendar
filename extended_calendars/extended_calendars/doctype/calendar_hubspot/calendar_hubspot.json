@@ -5,10 +5,13 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "section_break_opqa",
+  "column_break_lauq",
   "usser",
   "access_token",
-  "owner_id",
+  "calendar_id",
   "section_break_tsjr",
+  "column_break_tave",
   "pull",
   "column_break_clxb",
   "push"
@@ -23,11 +26,6 @@
    "fieldname": "access_token",
    "fieldtype": "Data",
    "label": "Access Token"
-  },
-  {
-   "fieldname": "owner_id",
-   "fieldtype": "Data",
-   "label": "Owner Id"
   },
   {
    "fieldname": "section_break_tsjr",
@@ -48,11 +46,28 @@
    "fieldname": "push",
    "fieldtype": "Check",
    "label": "Push"
+  },
+  {
+   "fieldname": "calendar_id",
+   "fieldtype": "Data",
+   "label": "Calendar ID"
+  },
+  {
+   "fieldname": "column_break_tave",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_opqa",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_lauq",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-03-31 11:08:22.288457",
+ "modified": "2025-04-09 21:14:33.838626",
  "modified_by": "Administrator",
  "module": "Extended Calendars",
  "name": "Calendar Hubspot",
