@@ -133,6 +133,10 @@ app_license = "mit"
 # 	"ToDo": "custom_app.overrides.CustomToDo"
 # }
 
+override_doctype_class = {
+    "Event": "extended_calendars.overrides.event.custom_event.CustomEvent"
+}
+
 # Document Events
 # ---------------
 # Hook on document methods and events
