@@ -547,7 +547,7 @@ def update_hubspot_meeting(event, access_token, headers, owner_id=None):
 
 @frappe.whitelist()
 def push_hubspot_data(hubspot_doc):
-    """Push all events to HubSpot, determining whether to create or update based on custom_calendar_event_id."""
+    """Push events to HubSpot, creating or updating meetings based on custom_calendar_event_id, for events matching the specified calendar."""
     print(f"Executing push_hubspot_data for doc: {hubspot_doc}")
     doc = frappe.get_doc("Calendar Hubspot", hubspot_doc)
     
@@ -556,16 +556,27 @@ def push_hubspot_data(hubspot_doc):
         return "Push is disabled."
     
     access_token = doc.get_access_token()
-    print(f"Using access token: {access_token}")
+    calendar_id = doc.calendar_id  # Obtener el calendar_id del documento
+    if not calendar_id:
+        error_msg = "Calendar ID is not set in the Calendar Hubspot document."
+        print(error_msg)
+        frappe.throw(error_msg)
     
+    print(f"Using access token: {access_token}, Calendar ID: {calendar_id}")
+    
+    # Filtrar eventos según los criterios especificados
     events = frappe.get_all(
         "Event",
-        fields=["name", "subject", "description", "starts_on", "ends_on", "custom_calendar_event_id"]  # Usamos custom_calendar_event_id
+        filters={
+            "custom_calendar_provider": "Calendar Hubspot",
+            "custom_calendar_id": calendar_id
+        },
+        fields=["name", "subject", "description", "starts_on", "ends_on", "custom_calendar_event_id", "custom_calendar_id"]
     )
     
     if not events:
-        print("No events found to push to HubSpot.")
-        return "No events found to push to HubSpot."
+        print(f"No events found matching provider 'Calendar Hubspot' and calendar_id '{calendar_id}'.")
+        return f"No events found matching provider 'Calendar Hubspot' and calendar_id '{calendar_id}'."
     
     headers = {
         "Authorization": f"Bearer {access_token}",
@@ -576,31 +587,43 @@ def push_hubspot_data(hubspot_doc):
     success_count = 0
     for event in events:
         try:
-            custom_id = event.get("custom_calendar_event_id")  # Usamos custom_calendar_event_id
+            # Verificar que custom_calendar_id coincide explícitamente
+            if event.get("custom_calendar_id") != calendar_id:
+                print(f"Skipping event {event.name}: custom_calendar_id '{event.custom_calendar_id}' does not match calendar_id '{calendar_id}'.")
+                continue
+                
+            custom_id = event.get("custom_calendar_event_id")
             if custom_id:
+                # Verificar si la reunión existe en HubSpot
                 check_url = f"https://api.hubapi.com/crm/v3/objects/meetings/{custom_id}"
                 print(f"Checking if meeting exists with custom_calendar_event_id: {custom_id}")
                 check_response = requests.get(check_url, headers=headers)
                 print(f"Check API response: {check_response.status_code}, {check_response.text}")
                 
                 if check_response.status_code == 200:
+                    # La reunión existe, proceder a actualizar
                     success, message = update_hubspot_meeting(event, access_token, headers, owner_id)
                     if success:
                         success_count += 1
+                        print(f"Successfully updated event {event.name}")
                     else:
                         print(f"Failed to update event {event.name}: {message}")
                 else:
+                    # La reunión no existe, crear una nueva
                     success, message = push_hubspot_meeting(event, access_token, headers, owner_id)
                     if success:
                         success_count += 1
+                        print(f"Successfully created new meeting for event {event.name}")
                     else:
-                        print(f"Failed to push event {event.name}: {message}")
+                        print(f"Failed to create meeting for event {event.name}: {message}")
             else:
+                # No hay custom_calendar_event_id, crear una nueva reunión
                 success, message = push_hubspot_meeting(event, access_token, headers, owner_id)
                 if success:
                     success_count += 1
+                    print(f"Successfully created new meeting for event {event.name}")
                 else:
-                    print(f"Failed to push event {event.name}: {message}")
+                    print(f"Failed to create meeting for event {event.name}: {message}")
                 
         except Exception as e:
             error_msg = f"Error processing event {event.name}: {str(e)}"
