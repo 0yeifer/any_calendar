@@ -547,7 +547,7 @@ def update_hubspot_meeting(event, access_token, headers, owner_id=None):
 
 @frappe.whitelist()
 def push_hubspot_data(hubspot_doc):
-    """Push events to HubSpot, creating or updating meetings based on custom_calendar_event_id, for events matching the specified calendar."""
+    """Push events to HubSpot, creating or updating meetings based on custom_calendar_event_id, for events matching the specified calendar and with sync enabled."""
     print(f"Executing push_hubspot_data for doc: {hubspot_doc}")
     doc = frappe.get_doc("Calendar Hubspot", hubspot_doc)
     
@@ -569,14 +569,15 @@ def push_hubspot_data(hubspot_doc):
         "Event",
         filters={
             "custom_calendar_provider": "Calendar Hubspot",
-            "custom_calendar_id": calendar_id
+            "custom_calendar_id": calendar_id,
+            "custom_sync_with_calendar_provider": 1  # Solo eventos con sync habilitado
         },
         fields=["name", "subject", "description", "starts_on", "ends_on", "custom_calendar_event_id", "custom_calendar_id"]
     )
     
     if not events:
-        print(f"No events found matching provider 'Calendar Hubspot' and calendar_id '{calendar_id}'.")
-        return f"No events found matching provider 'Calendar Hubspot' and calendar_id '{calendar_id}'."
+        print(f"No events found matching provider 'Calendar Hubspot', calendar_id '{calendar_id}', and custom_sync_with_calendar_provider enabled.")
+        return f"No events found matching provider 'Calendar Hubspot', calendar_id '{calendar_id}', and custom_sync_with_calendar_provider enabled."
     
     headers = {
         "Authorization": f"Bearer {access_token}",
