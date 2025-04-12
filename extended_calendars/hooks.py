@@ -44,6 +44,11 @@ app_license = "mit"
 
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
+
+doctype_js = {
+    "Event": "public/js/override/custom_event.js",
+}
+
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -133,6 +138,10 @@ app_license = "mit"
 # 	"ToDo": "custom_app.overrides.CustomToDo"
 # }
 
+override_doctype_class = {
+    "Event": "extended_calendars.overrides.event.custom_event.CustomEvent"
+}
+
 # Document Events
 # ---------------
 # Hook on document methods and events
@@ -145,6 +154,15 @@ app_license = "mit"
 # 	}
 # }
 
+doc_events = {
+    "Event": {
+        "after_insert": "extended_calendars.extended_calendars.doctype.calendar_hubspot.calendar_hubspot.insert_event_in_calendar_hubspot",
+        "on_update": "extended_calendars.extended_calendars.doctype.calendar_hubspot.calendar_hubspot.update_event_in_calendar_hubspot",
+        "on_trash": "extended_calendars.extended_calendars.doctype.calendar_hubspot.calendar_hubspot.delete_event_in_calendar_hubspot",
+    }
+}
+
+# /workspace/development/frappe-bench/apps/extended_calendars/extended_calendars/extended_calendars/doctype/calendar_hubspot/calendar_hubspot.py
 # Scheduled Tasks
 # ---------------
 
