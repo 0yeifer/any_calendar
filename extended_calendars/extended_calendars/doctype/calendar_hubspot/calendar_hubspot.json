@@ -1,13 +1,20 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "naming_series:",
  "creation": "2025-03-31 11:06:59.404824",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "section_break_qgvk",
+  "column_break_hasd",
+  "naming_series",
   "section_break_opqa",
   "column_break_lauq",
   "usser",
+  "first_name",
+  "last_name",
+  "column_break_kqdf",
   "access_token",
   "calendar_id",
   "section_break_tsjr",
@@ -63,14 +70,43 @@
   {
    "fieldname": "column_break_lauq",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_qgvk",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_hasd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "EXT-CAL-HUBSPOT-.#######"
+  },
+  {
+   "fieldname": "first_name",
+   "fieldtype": "Data",
+   "label": "First Name"
+  },
+  {
+   "fieldname": "last_name",
+   "fieldtype": "Data",
+   "label": "Last Name"
+  },
+  {
+   "fieldname": "column_break_kqdf",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-04-09 21:14:33.838626",
+ "modified": "2025-04-11 23:41:56.848689",
  "modified_by": "Administrator",
  "module": "Extended Calendars",
  "name": "Calendar Hubspot",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -86,7 +122,9 @@
    "write": 1
   }
  ],
+ "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "first_name"
 }
