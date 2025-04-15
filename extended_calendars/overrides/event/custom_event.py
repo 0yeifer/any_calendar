@@ -34,28 +34,24 @@ class CustomEvent(Event):
     def before_save(self):
         try:
             
-            calendar_provider = self.custom_calendar_provider
-            calendar = self.custom_calendar
-            sync_with_calendar_provider = self.custom_sync_with_calendar_provider
-
             if (self.sync_with_google_calendar == 1 and frappe.db.exists("Google Calendar", self.google_calendar)):
                 self.custom_sync_with_calendar_provider = 1
                 self.custom_calendar_provider = "Google Calendar"
                 self.custom_calendar = self.google_calendar
 
-            if (self.sync_with_google_calendar == 1 and sync_with_calendar_provider == 1):
-                if (calendar_provider != "Google Calendar" or not frappe.db.exists("Google Calendar", calendar)):
+            if (self.sync_with_google_calendar == 1 and self.custom_sync_with_calendar_provider == 1):
+                if (self.custom_calendar_provider != "Google Calendar" or not frappe.db.exists("Google Calendar", self.custom_calendar)):
                     self.sync_with_google_calendar = 0
             else:
                 self.sync_with_google_calendar = 0 
 
-            if (sync_with_calendar_provider == 1):
+            if (self.custom_sync_with_calendar_provider == 1):
                 self.sync_with_google_calendar = 0
-                if (calendar_provider == "Google Calendar" and calendar):
-                    if frappe.db.exists("Google Calendar", calendar):
-                        self.sync_with_google_calendar = sync_with_calendar_provider
-                        self.google_calendar = calendar
-                elif (calendar_provider and calendar):
+                if (self.custom_calendar_provider == "Google Calendar" and self.custom_calendar):
+                    if frappe.db.exists("Google Calendar", self.custom_calendar):
+                        self.sync_with_google_calendar = self.custom_sync_with_calendar_provider
+                        self.google_calendar = self.custom_calendar
+                elif (self.custom_calendar_provider and self.custom_calendar):
                     self.set_custom_calendar_id()
 
             super(CustomEvent, self).before_save()
