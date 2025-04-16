@@ -684,7 +684,7 @@ def insert_event_in_calendar_hubspot(doc, method = None):
             event = frappe.get_doc("Event", doc.name)
             access_token = calendar.get_access_token()
             headers = get_headers(access_token)
-            owner_id = calendar.owner_id
+            owner_id = calendar.calendar_id
 
             success, message, meeting_id = push_hubspot_meeting(event, access_token, headers, owner_id)
             if success:
@@ -715,7 +715,7 @@ def update_event_in_calendar_hubspot(doc, method = None):
             event = frappe.get_doc("Event", doc.name)
             access_token = calendar.get_access_token()
             headers = get_headers(access_token)
-            owner_id = calendar.owner_id
+            owner_id = calendar.calendar_id
 
             success, message = update_hubspot_meeting(event, access_token, headers, owner_id)
             if success:
