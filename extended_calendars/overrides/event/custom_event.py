@@ -62,7 +62,7 @@ class CustomEvent(Event):
         try:
             calendar_exist = frappe.db.exists("Google Calendar", self.google_calendar)
 
-            if (self.pulled_from_google_calendar == 1 and self.google_calendar and calendar_exist):
+            if (self.google_calendar and calendar_exist):
                 self.sync_with_google_calendar = 1
                 self.custom_sync_with_calendar_provider = self.sync_with_google_calendar
                 self.custom_calendar_provider = "Google Calendar"
