@@ -61,6 +61,9 @@ class CustomEvent(Event):
     def after_insert(self):
         try:
             calendar_exist = frappe.db.exists("Google Calendar", self.google_calendar)
+            if (not calendar_exist):
+                calendar_exist = frappe.db.exists("Google Calendar", self.custom_calendar)
+                self.google_calendar = self.custom_calendar
 
             if (self.google_calendar and calendar_exist):
                 self.sync_with_google_calendar = 1
