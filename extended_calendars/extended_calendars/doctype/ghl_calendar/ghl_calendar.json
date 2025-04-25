@@ -1,0 +1,125 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-04-21 10:25:25.867778",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_pqxz",
+  "column_break_uash",
+  "naming_series",
+  "section_break_abyr",
+  "column_break_iqnm",
+  "calendar_name",
+  "calendar_id",
+  "column_break_qvas",
+  "access_token",
+  "location_id",
+  "section_break_evcu",
+  "column_break_hgcv",
+  "pull",
+  "column_break_iqho",
+  "push"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_pqxz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_uash",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "EXT-CAL-GHL-.#######"
+  },
+  {
+   "fieldname": "section_break_abyr",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_iqnm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "calendar_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Calendar Name"
+  },
+  {
+   "fieldname": "calendar_id",
+   "fieldtype": "Data",
+   "label": "Calendar Id"
+  },
+  {
+   "fieldname": "column_break_qvas",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "access_token",
+   "fieldtype": "Data",
+   "label": "Access Token"
+  },
+  {
+   "fieldname": "location_id",
+   "fieldtype": "Data",
+   "label": "Location Id"
+  },
+  {
+   "fieldname": "section_break_evcu",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_hgcv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "pull",
+   "fieldtype": "Check",
+   "label": "Pull"
+  },
+  {
+   "fieldname": "column_break_iqho",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "push",
+   "fieldtype": "Check",
+   "label": "Push"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-04-21 10:30:45.935918",
+ "modified_by": "Administrator",
+ "module": "Extended Calendars",
+ "name": "GHL Calendar",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "show_title_field_in_link": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "calendar_name"
+}
