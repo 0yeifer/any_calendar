@@ -139,7 +139,8 @@ doctype_js = {
 # }
 
 override_doctype_class = {
-    "Event": "extended_calendars.overrides.event.custom_event.CustomEvent"
+    "Event": "extended_calendars.overrides.event.custom_event.CustomEvent",
+    "Contact": "extended_calendars.overrides.contact.custom_contact.CustomContact"
 }
 
 # Document Events

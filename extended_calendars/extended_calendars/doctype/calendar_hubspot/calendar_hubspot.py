@@ -114,23 +114,17 @@ def get_contact_ids_from_participants(participants, access_token, headers, owner
             continue
         try:
             contact = frappe.get_doc("Contact", participant.reference_docname)
-            email = contact.email_id
             first_name = contact.first_name
-            last_name = contact.last_name
-            print(f"Participant Contact - Email: {email or 'Not set'}, "
-                  f"First Name: {first_name or 'Not set'}, Last Name: {last_name or 'Not set'}")
-            
-            if not email:
-                print(f"Warning: No email found for Contact {participant.reference_docname}")
-                continue
+            mobile_no = contact.mobile_no
+            print(f"First Name: {first_name or 'Not set'}, ")
                 
-            contact_id = get_hubspot_contact_id_by_email(email, access_token, headers)
+            contact_id = get_contact_id_with_firstname(first_name, access_token, headers)
             if not contact_id:
-                contact_id = create_hubspot_contact(email, first_name, last_name, owner_id, access_token, headers)
+                contact_id = create_hubspot_contact(first_name,mobile_no, owner_id, access_token, headers)
             if contact_id:
                 contact_ids.append(contact_id)
             else:
-                print(f"Warning: Failed to create HubSpot contact for email {email}")
+                print(f"Warning: Failed to create HubSpot contact")
         except frappe.DoesNotExistError:
             print(f"Error: Contact {participant.reference_docname} not found")
     return contact_ids
@@ -154,55 +148,77 @@ class CalendarHubspot(Document):
             frappe.throw("No token has been entered in 'Access Token'.")
         return self.access_token
 
+
 @frappe.whitelist()
-def get_hubspot_contact_id_by_email(email, access_token, headers):
-    """Fetch HubSpot contact ID by email using the HubSpot API."""
-    print(f"Fetching HubSpot contact ID for email: {email}")
+def get_contact_id_with_firstname(firstname, access_token, headers):
+    """Fetch HubSpot contact ID by firstname using a temporary cache."""
+    print(f"Fetching HubSpot contact ID for firstname: {firstname}")
     
-    payload = {
-        "properties": ["email"],
-        "filterGroups": [{
-            "filters": [{
-                "propertyName": "email",
-                "operator": "EQ",
-                "value": email
-            }]
-        }]
-    }
-    
-    try:
-        response = requests.post(CONTACTS_SEARCH_URL, headers=headers, json=payload)
-        print(f"API response for email {email}: {response.status_code}, {response.text}")
-        
-        if response.status_code in SUCCESS_STATUS_CODES:
-            data = response.json()
-            results = data.get("results", [])
-            if results:
-                contact_id = results[0].get("id")
-                print(f"Found contact ID {contact_id} for email {email}")
-                return contact_id
-            print(f"No contact found for email {email}")
-            return None
-        error_msg = f"Error fetching contact for {email}: {response.status_code} - {response.text}"
-        print(error_msg)
-        frappe.log_error(error_msg, "HubSpot Contact Fetch Error")
+    if not firstname:
+        print("No firstname provided.")
         return None
+    firstname_lower = firstname.lower()
+
+    if not hasattr(frappe.local, 'hubspot_contact_cache'):
+        frappe.local.hubspot_contact_cache = {}
+
+    if firstname_lower in frappe.local.hubspot_contact_cache:
+        contact_id = frappe.local.hubspot_contact_cache[firstname_lower]
+        print(f"Found contact ID {contact_id} for firstname {firstname} in cache")
+        return contact_id
+    
+    # If cache is empty or firstname not found, fetch contacts
+    print("Fetching contacts from HubSpot to populate cache...")
+    params = {
+        "properties": "firstname,id",
+        "limit": 100
+    }
+    try:
+        while True:
+            response = requests.get(CONTACTS_URL, headers=headers, params=params)
+            print(f"API response for contacts fetch: {response.status_code}")
+            
+            if response.status_code not in SUCCESS_STATUS_CODES:
+                error_msg = f"Error fetching contacts: {response.status_code} - {response.text}"
+                print(error_msg)
+                frappe.log_error(error_msg, "HubSpot Contacts Fetch Error")
+                return None
+            
+            data = response.json()
+            print(f"Full API response for contacts: {json.dumps(data, indent=2)}")
+            results = data.get("results", [])
+            
+            for contact in results:
+                contact_id = contact.get("id")
+                contact_firstname = contact.get("properties", {}).get("firstname", "")
+                if contact_id and contact_firstname:
+                    frappe.local.hubspot_contact_cache[contact_firstname.lower()] = contact_id           
+            print(f"Cached {len(results)} contacts. Total cached: {len(frappe.local.hubspot_contact_cache)}")            
+            if "paging" in data and "next" in data["paging"]:
+                params["after"] = data["paging"]["next"]["after"]
+            else:
+                break
+        if firstname_lower in frappe.local.hubspot_contact_cache:
+            contact_id = frappe.local.hubspot_contact_cache[firstname_lower]
+            print(f"Found contact ID {contact_id} for firstname {firstname} after cache population")
+            return contact_id
+        
+        print(f"No contact found for firstname {firstname}")
+        return None
+    
     except Exception as e:
-        error_msg = f"Exception fetching contact for {email}: {str(e)}"
+        error_msg = f"Exception fetching contacts for firstname {firstname}: {str(e)}"
         print(error_msg)
         frappe.log_error(error_msg, "HubSpot Contact Fetch Exception")
         return None
 
 @frappe.whitelist()
-def create_hubspot_contact(email, first_name, last_name, owner_id, access_token, headers):
+def create_hubspot_contact(mobile_no, first_name, owner_id, headers):
     """Create a new contact in HubSpot if it doesn't exist."""
-    print(f"Creating new HubSpot contact for email: {email}")
-    
     payload = {
         "properties": {
-            "email": email,
             "firstname": first_name if first_name else "X",
-            "lastname": last_name if last_name else "X"
+            "phone": f"+57{mobile_no}",
         }
     }
     if owner_id:
@@ -215,14 +231,14 @@ def create_hubspot_contact(email, first_name, last_name, owner_id, access_token,
         if response.status_code in SUCCESS_STATUS_CODES:
             data = response.json()
             contact_id = data.get("id")
-            print(f"Successfully created contact with ID {contact_id} for email {email}")
+            print(f"Successfully created contact with ID {contact_id}")
             return contact_id
-        error_msg = f"Error creating contact for {email}: {response.status_code} - {response.text}"
+        error_msg = f"Error creating contact: {response.status_code} - {response.text}"
         print(error_msg)
         frappe.log_error(error_msg, "HubSpot Contact Creation Error")
         return None
     except Exception as e:
-        error_msg = f"Exception creating contact for {email}: {str(e)}"
+        error_msg = f"Exception creating contact: {str(e)}"
         print(error_msg)
         frappe.log_error(error_msg, "HubSpot Contact Creation Exception")
         return None
