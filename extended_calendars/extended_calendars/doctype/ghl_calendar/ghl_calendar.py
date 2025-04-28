@@ -7,6 +7,7 @@ import json
 import time
 import logging
 import pytz
+import re
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import get_datetime, now_datetime
@@ -290,7 +291,8 @@ def push_ghl_data(config, doc_name=None):
                 "locationId": config["location_id"],
                 "startTime": start_time_ghl,
                 "endTime": end_time_ghl,
-                "contactId": contact_id if contact_id else ""
+                "contactId": contact_id if contact_id else "",
+                "notes": event.get("description", "")
             }
 
             headers = {
@@ -500,39 +502,6 @@ def format_sync_results(pull_result, push_result):
     push_msg = push_result.get("message", "No se realizó push")
     return f"Resultados de sincronización:\n- Pull: {pull_msg}\n- Push: {push_msg}"
 
-# Función make_api_request
-def make_api_request(endpoint, access_token, method="GET", json_data=None, params=None, headers=None):
-    """Realiza una solicitud a la API de GoHighLevel con la cabecera Version."""
-    default_headers = {
-        "Authorization": f"Bearer {access_token}",
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "Version": "2021-04-15"
-    }
-    if headers:
-        default_headers.update(headers)
-    
-    url = f"https://services.leadconnectorhq.com{endpoint}"
-    try:
-        logger.info(f"Solicitando {method} {url}")
-        response = requests.request(
-            method,
-            url,
-            headers=default_headers,
-            json=json_data,
-            params=params,
-            timeout=10
-        )
-        response.raise_for_status()
-        content = response.json()
-        logger.info(f"Respuesta: {response.status_code}, Contenido: {content}")
-        return content
-    except requests.exceptions.RequestException as e:
-        error_msg = f"{response.status_code} Client Error: {response.reason} for url: {url}" if response else str(e)
-        content = response.json() if response and response.content else {}
-        logger.error(f"Error en API: {{'error': '{error_msg}', 'url': '{url}', 'status_code': {response.status_code if response else 0}, 'response': {json.dumps(content)}}}")
-        return {"error": error_msg, "status": response.status_code if response else 0}
-
 # Otras funciones utilitarias
 def get_ghl_config(doc_name=None):
     """Obtiene configuración de GHL Calendar desde un documento."""
@@ -546,22 +515,6 @@ def get_default_date_range(timezone="America/New_York"):
     start = datetime.now(tz) - timedelta(days=3)
     end = datetime.now(tz) + relativedelta(months=6)
     return str(int(start.timestamp() * 1000)), str(int(end.timestamp() * 1000))
-
-def get_user_id_from_calendar(config):
-    """Obtiene userId desde un calendarId."""
-    logger.info(f"Obteniendo userId para calendarId: {config['calendar_id']}")
-    response = make_api_request(f"/calendars/{config['calendar_id']}", config["access_token"])
-    if "calendar" not in response or not response["calendar"].get("teamMembers"):
-        logger.error(f"No se encontraron teamMembers para el calendario {config['calendar_id']}")
-        frappe.throw(_("No se encontraron teamMembers para el calendario {0}").format(config["calendar_id"]))
-    
-    user_id = response["calendar"]["teamMembers"][0].get("userId")
-    if not user_id:
-        logger.error(f"No se encontró userId para el calendario {config['calendar_id']}")
-        frappe.throw(_("No se encontró userId para el calendario {0}").format(config["calendar_id"]))
-    
-    logger.info(f"userId encontrado: {user_id}")
-    return user_id
 
 def build_api_params(config, **kwargs):
     """Construye parámetros para solicitudes API."""
@@ -671,3 +624,363 @@ def sync_contacts(doc_name=None):
     result = {"created": created, "updated": updated, "skipped": skipped}
     logger.info(f"Sincronización de contactos completada: {result}")
     return result
+
+def get_headers(access_token):
+    """Devuelve las cabeceras estándar para solicitudes a GHL."""
+    return {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "Version": "2021-04-15"
+    }
+
+def get_user_id_from_calendar(config):
+    """Obtiene userId desde un calendarId."""
+    logger.info(f"Obteniendo userId para calendarId: {config['calendar_id']}")
+    response = make_api_request(f"/calendars/{config['calendar_id']}", config["access_token"])
+    if "calendar" not in response or not response["calendar"].get("teamMembers"):
+        logger.error(f"No se encontraron teamMembers para el calendario {config['calendar_id']}")
+        frappe.throw(_("No se encontraron teamMembers para el calendario {0}").format(config['calendar_id']))
+    
+    user_id = response["calendar"]["teamMembers"][0].get("userId")
+    if not user_id:
+        logger.error(f"No se encontró userId para el calendario {config['calendar_id']}")
+        frappe.throw(_("No se encontró userId para el calendario {0}").format(config['calendar_id']))
+    
+    logger.info(f"userId encontrado: {user_id}")
+    return user_id
+
+def make_api_request(endpoint, access_token, method="GET", json_data=None, params=None, headers=None):
+    """Realiza una solicitud a la API de GoHighLevel."""
+    default_headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "Version": "2021-04-15"
+    }
+    if headers:
+        default_headers.update(headers)
+    
+    url = f"https://services.leadconnectorhq.com{endpoint}"
+    try:
+        logger.info(f"Solicitando {method} {url}")
+        response = requests.request(
+            method,
+            url,
+            headers=default_headers,
+            json=json_data,
+            params=params,
+            timeout=10
+        )
+        response.raise_for_status()
+        content = response.json()
+        logger.info(f"Respuesta: {response.status_code}, Contenido: {content}")
+        return content
+    except requests.exceptions.RequestException as e:
+        # Inicializar valores por defecto
+        status_code = 0
+        error_msg = str(e)
+        content = {}
+        
+        # Si hay una respuesta, extraer detalles
+        if 'response' in locals() and response is not None:
+            status_code = response.status_code
+            error_msg = f"{status_code} Client Error: {response.reason} for url: {url}"
+            try:
+                content = response.json()
+            except ValueError:
+                content = {"raw_response": response.text}
+        
+        # Registrar el error
+        logger.error(f"Error en API: {{'error': '{error_msg}', 'url': '{url}', 'status_code': {status_code}, 'response': {json.dumps(content)}}}")
+        return {"error": error_msg, "status": status_code}
+
+def normalize_phone(phone):
+    """Normaliza un número de teléfono eliminando caracteres no numéricos, manteniendo el código de país."""
+    if not phone:
+        return ""
+    # Mantener solo dígitos y el signo '+' (para códigos de país)
+    return re.sub(r'[^\d+]', '', phone)
+
+def create_or_update_ghl_contact(event, access_token, location_id, user_id, headers):
+    """Crea o actualiza un contacto en GHL y lo asigna al user_id, buscando por número de teléfono."""
+    if not event.custom_client_name or not event.custom_contact_phone:
+        logger.warning(f"Evento {event.name} sin custom_client_name o custom_contact_phone válidos")
+        return None
+
+    # Normalizar el número de teléfono ingresado
+    raw_phone = event.custom_contact_phone.strip()
+    normalized_phone = normalize_phone(raw_phone)
+
+    contact_data = {
+        "firstName": event.custom_client_name.strip(),
+        "phone": raw_phone,  # Mantener el formato original para la API
+        "locationId": location_id,
+        "assignedTo": user_id
+    }
+
+    # Validar datos del contacto
+    if not contact_data["firstName"] or not normalized_phone:
+        logger.warning(f"Datos de contacto inválidos para evento {event.name}: nombre={contact_data['firstName']}, teléfono={contact_data['phone']}")
+        return None
+
+    # Buscar contacto existente por número de teléfono
+    response = make_api_request(
+        "/contacts/",
+        access_token,
+        method="GET",
+        params={"query": raw_phone, "locationId": location_id},
+        headers={"Version": "2021-07-28"}
+    )
+    contacts = response.get("contacts", [])
+    
+    # Filtrar contactos para coincidencia de subcadena con el número normalizado
+    matching_contacts = [
+        contact for contact in contacts
+        if normalized_phone in normalize_phone(contact.get("phone", ""))
+        and len(normalize_phone(contact.get("phone", ""))) >= len(normalized_phone)
+    ]
+
+    if matching_contacts:
+        contact = matching_contacts[0]
+        contact_id = contact.get("id")
+        current_assigned_to = contact.get("assignedTo", "")
+        
+        # Verificar si el assignedTo cambió
+        if current_assigned_to and current_assigned_to != user_id:
+            logger.warning(f"Cambio de usuario asignado para contacto {contact_id} (teléfono: {contact_data['phone']}): de {current_assigned_to} a {user_id}")
+
+        # Actualizar contacto existente con firstName, phone y assignedTo
+        update_data = {
+            "firstName": contact_data["firstName"],
+            "phone": contact_data["phone"],
+            "assignedTo": user_id
+        }
+        response = make_api_request(
+            f"/contacts/{contact_id}",
+            access_token,
+            method="PUT",
+            json_data=update_data,
+            headers={"Version": "2021-07-28"}
+        )
+        if response.get("error"):
+            logger.error(f"Error actualizando contacto {contact_id} para evento {event.name}: {response['error']}")
+            return None
+        logger.info(f"Contacto actualizado para evento {event.name}: ID={contact_id}, assignedTo={user_id}")
+        return contact_id
+    else:
+        # Crear nuevo contacto
+        response = make_api_request(
+            "/contacts/",
+            access_token,
+            method="POST",
+            json_data=contact_data,
+            headers={"Version": "2021-07-28"}
+        )
+        contact_id = response.get("contact", {}).get("id")
+        if contact_id:
+            logger.info(f"Contacto creado para evento {event.name}: ID={contact_id}, assignedTo={user_id}")
+            return contact_id
+        else:
+            logger.error(f"No se pudo crear contacto para evento {event.name}: {response.get('error', 'Sin ID')}")
+            return None
+
+def insert_event_in_ghl_calendar(doc, method=None):
+    """Insert event in GHL calendar."""
+    try:
+        if not (doc.custom_sync_with_calendar_provider == 1 
+                and doc.custom_calendar_provider == "GHL Calendar" 
+                and doc.custom_calendar
+                and not doc.custom_calendar_event_id):
+            logger.info(f"Evento {doc.name} no cumple criterios para inserción en GHL")
+            return
+
+        calendar = frappe.get_doc("GHL Calendar", doc.custom_calendar)
+        config = {"access_token": calendar.access_token, "calendar_id": calendar.calendar_id, "location_id": calendar.location_id}
+        
+        # Validar configuración
+        if not all([config["access_token"], config["calendar_id"], config["location_id"]]):
+            frappe.throw(_("Los campos access_token, calendar_id y location_id son requeridos en GHL Calendar"))
+
+        # Obtener user_id
+        user_id = get_user_id_from_calendar(config)
+        
+        # Crear o actualizar contacto
+        contact_id = create_or_update_ghl_contact(doc, config["access_token"], config["location_id"], user_id, get_headers(config["access_token"]))
+        
+        # Convertir fechas a datetime
+        logger.info(f"Evento {doc.name}: starts_on={doc.starts_on}, ends_on={doc.ends_on}")
+        try:
+            starts_on = frappe.utils.get_datetime(doc.starts_on)
+            ends_on = frappe.utils.get_datetime(doc.ends_on)
+        except Exception as e:
+            logger.error(f"Error convirtiendo fechas para evento {doc.name}: {str(e)}")
+            frappe.throw(_("Error convirtiendo fechas del evento: {0}").format(str(e)))
+
+        # Preparar datos del evento
+        start_time_ghl = starts_on.strftime("%Y-%m-%dT%H:%M:%S-05:00")
+        end_time_ghl = ends_on.strftime("%Y-%m-%dT%H:%M:%S-05:00")
+        title = doc.subject or "Evento GHL"
+        cleaned_title = " ".join(title.split())
+        print(f"cleaned_title: {cleaned_title}")
+        event_data = {
+            "title": cleaned_title,
+            "appointmentStatus": "new",
+            "assignedUserId": user_id,
+            "ignoreFreeSlotValidation": True,
+            "calendarId": config["calendar_id"],
+            "locationId": config["location_id"],
+            "startTime": start_time_ghl,
+            "endTime": end_time_ghl,
+            "contactId": contact_id or "",
+            "notes": doc.description or ""
+        }
+
+        # Insertar evento en GHL
+        response = make_api_request(
+            "/calendars/events/appointments",
+            config["access_token"],
+            method="POST",
+            json_data=event_data,
+            headers=get_headers(config["access_token"])
+        )
+
+        if response.get("error"):
+            logger.error(f"Error insertando evento {doc.name} en GHL: {response['error']}")
+            frappe.msgprint(_("Error insertando evento en GHL: {0}").format(response["error"]))
+            return
+
+        meeting_id = response.get("id") or response.get("appointment", {}).get("id")
+        if meeting_id:
+            doc.custom_calendar_event_id = meeting_id
+            doc.custom_pulled_from_calendar_provider = 0
+            doc.db_update()
+            frappe.db.commit()
+            logger.info(f"Evento {doc.name} insertado en GHL con ID: {meeting_id}")
+            frappe.msgprint(_("Evento insertado exitosamente en GHL con ID: {0}").format(meeting_id))
+        else:
+            logger.error(f"No se obtuvo ID del evento creado para {doc.name}")
+            frappe.msgprint(_("Error: No se obtuvo ID del evento creado en GHL"))
+
+    except frappe.DoesNotExistError:
+        logger.error(f"Documento {doc.name} no existe")
+        frappe.msgprint(_("Error: Documento {0} no existe").format(doc.name))
+    except Exception as e:
+        logger.error(f"Error insertando evento {doc.name} en GHL: {str(e)}")
+        frappe.msgprint(_("Error insertando evento en GHL: {0}").format(str(e)))
+
+def update_event_in_ghl_calendar(doc, method=None):
+    """Update event in GHL calendar."""
+    try:
+        if not (doc.custom_sync_with_calendar_provider == 1 
+                and doc.custom_calendar_provider == "GHL Calendar" 
+                and doc.custom_calendar
+                and doc.custom_calendar_event_id):
+            logger.info(f"Evento {doc.name} no cumple criterios para actualización en GHL")
+            return
+
+        calendar = frappe.get_doc("GHL Calendar", doc.custom_calendar)
+        config = {"access_token": calendar.access_token, "calendar_id": calendar.calendar_id, "location_id": calendar.location_id}
+        
+        # Validar configuración
+        if not all([config["access_token"], config["calendar_id"], config["location_id"]]):
+            frappe.throw(_("Los campos access_token, calendar_id y location_id son requeridos en GHL Calendar"))
+
+        # Obtener user_id
+        user_id = get_user_id_from_calendar(config)
+        
+        # Crear o actualizar contacto
+        contact_id = create_or_update_ghl_contact(doc, config["access_token"], config["location_id"], user_id, get_headers(config["access_token"]))
+        
+        # Convertir fechas a datetime
+        logger.info(f"Evento {doc.name}: starts_on={doc.starts_on}, ends_on={doc.ends_on}")
+        try:
+            starts_on = frappe.utils.get_datetime(doc.starts_on)
+            ends_on = frappe.utils.get_datetime(doc.ends_on)
+        except Exception as e:
+            logger.error(f"Error convirtiendo fechas para evento {doc.name}: {str(e)}")
+            frappe.throw(_("Error convirtiendo fechas del evento: {0}").format(str(e)))
+
+        # Preparar datos del evento
+        start_time_ghl = starts_on.strftime("%Y-%m-%dT%H:%M:%S-05:00")
+        end_time_ghl = ends_on.strftime("%Y-%m-%dT%H:%M:%S-05:00")
+
+        title = doc.subject or "Evento GHL"
+        cleaned_title = " ".join(title.split())
+        print(f"cleaned_title: {cleaned_title}")
+        event_data = {
+            "title": cleaned_title,
+            "appointmentStatus": "confirmed",
+            "assignedUserId": user_id,
+            "calendarId": config["calendar_id"],
+            "locationId": config["location_id"],
+            "startTime": start_time_ghl,
+            "endTime": end_time_ghl,
+            "contactId": contact_id or "",
+            "notes": doc.description or ""
+        }
+
+        # Actualizar evento en GHL
+        response = make_api_request(
+            f"/calendars/events/appointments/{doc.custom_calendar_event_id}",
+            config["access_token"],
+            method="PUT",
+            json_data=event_data,
+            headers=get_headers(config["access_token"])
+        )
+
+        if response.get("error"):
+            logger.error(f"Error actualizando evento {doc.name} en GHL: {response['error']}")
+            frappe.msgprint(_("Error actualizando evento en GHL: {0}").format(response["error"]))
+            return
+
+        logger.info(f"Evento {doc.name} actualizado en GHL con ID: {doc.custom_calendar_event_id}")
+
+    except frappe.DoesNotExistError:
+        logger.error(f"Documento {doc.name} no existe")
+        frappe.msgprint(_("Error: Documento {0} no existe").format(doc.name))
+    except Exception as e:
+        logger.error(f"Error actualizando evento {doc.name} en GHL: {str(e)}")
+        frappe.msgprint(_("Error actualizando evento en GHL: {0}").format(str(e)))
+
+def delete_event_in_ghl_calendar(doc, method=None):
+    """Delete event in GHL calendar."""
+    try:
+        if not (doc.custom_sync_with_calendar_provider == 1 
+                and doc.custom_calendar_provider == "GHL Calendar" 
+                and doc.custom_calendar
+                and doc.custom_calendar_event_id):
+            logger.info(f"Evento {doc.name} no cumple criterios para eliminación en GHL")
+            return
+
+        calendar = frappe.get_doc("GHL Calendar", doc.custom_calendar)
+        config = {"access_token": calendar.access_token, "calendar_id": calendar.calendar_id}
+        
+        # Validar configuración
+        if not all([config["access_token"], config["calendar_id"]]):
+            frappe.throw(_("Los campos access_token y calendar_id son requeridos en GHL Calendar"))
+
+        # Eliminar evento en GHL
+        response = make_api_request(
+            f"/calendars/events/{doc.custom_calendar_event_id}",
+            config["access_token"],
+            method="DELETE",
+            headers=get_headers(config["access_token"])
+        )
+
+        if response.get("error"):
+            logger.error(f"Error eliminando evento {doc.name} en GHL: {response['error']}")
+            frappe.msgprint(_("Error eliminando evento en GHL: {0}").format(response["error"]))
+            return
+
+        logger.info(f"Evento {doc.name} eliminado en GHL con ID: {doc.custom_calendar_event_id}")
+
+    except frappe.DoesNotExistError:
+        logger.error(f"Documento {doc.name} no existe")
+        frappe.msgprint(_("Error: Documento {0} no existe").format(doc.name))
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error de solicitud eliminando evento {doc.name} en GHL: {str(e)}")
+        frappe.msgprint(_("Error de solicitud eliminando evento en GHL: {0}").format(str(e)))
+    except Exception as e:
+        logger.error(f"Error eliminando evento {doc.name} en GHL: {str(e)}")
+        frappe.msgprint(_("Error eliminando evento en GHL: {0}").format(str(e)))

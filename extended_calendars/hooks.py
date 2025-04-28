@@ -157,9 +157,9 @@ override_doctype_class = {
 
 doc_events = {
     "Event": {
-        "after_insert": "extended_calendars.extended_calendars.doctype.calendar_hubspot.calendar_hubspot.insert_event_in_calendar_hubspot",
-        "on_update": "extended_calendars.extended_calendars.doctype.calendar_hubspot.calendar_hubspot.update_event_in_calendar_hubspot",
-        "on_trash": "extended_calendars.extended_calendars.doctype.calendar_hubspot.calendar_hubspot.delete_event_in_calendar_hubspot",
+        "after_insert": "extended_calendars.utils.insert_event_in_calendar_provider",
+        "on_update": "extended_calendars.utils.update_event_in_calendar_provider",
+        "on_trash": "extended_calendars.utils.delete_event_in_calendar_provider",
     }
 }
 
