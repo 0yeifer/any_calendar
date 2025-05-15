@@ -695,95 +695,114 @@ def make_api_request(endpoint, access_token, method="GET", json_data=None, param
         logger.error(f"Error en API: {{'error': '{error_msg}', 'url': '{url}', 'status_code': {status_code}, 'response': {json.dumps(content)}}}")
         return {"error": error_msg, "status": status_code}
 
-def normalize_phone(phone):
-    """Normaliza un número de teléfono eliminando caracteres no numéricos, manteniendo el código de país."""
+def normalize_phone(phone, country_code=None):
+    """Normaliza un número de teléfono, opcionalmente añadiendo un código de país."""
     if not phone:
         return ""
-    # Mantener solo dígitos y el signo '+' (para códigos de país)
-    return re.sub(r'[^\d+]', '', phone)
+    
+    cleaned_phone = re.sub(r'[^\d+]', '', phone.strip())
+    
+    if cleaned_phone.startswith('+'):
+        if country_code and cleaned_phone.startswith(country_code):
+            return cleaned_phone
+        cleaned_phone = re.sub(r'^\+\d{1,4}', '', cleaned_phone)
+    
+    if country_code:
+        normalized_phone = f"{country_code}{cleaned_phone}"
+        logger.info(f"Número normalizado con {country_code}: {normalized_phone}")
+        return normalized_phone
+    
+    logger.info(f"Número normalizado sin código de país: {cleaned_phone}")
+    return cleaned_phone
 
 def create_or_update_ghl_contact(event, access_token, location_id, user_id, headers):
-    """Crea o actualiza un contacto en GHL y lo asigna al user_id, buscando por número de teléfono."""
+    """Crea o actualiza un contacto en GHL, buscando primero con +1 y luego con +57."""
     if not event.custom_client_name or not event.custom_contact_phone:
         logger.warning(f"Evento {event.name} sin custom_client_name o custom_contact_phone válidos")
         return None
 
-    # Normalizar el número de teléfono ingresado
     raw_phone = event.custom_contact_phone.strip()
-    normalized_phone = normalize_phone(raw_phone)
+    base_phone = normalize_phone(raw_phone)
+
+    if not event.custom_client_name.strip() or not base_phone:
+        logger.warning(f"Datos de contacto inválidos para evento {event.name}: nombre={event.custom_client_name}, teléfono={base_phone}")
+        return None
 
     contact_data = {
         "firstName": event.custom_client_name.strip(),
-        "phone": raw_phone,  # Mantener el formato original para la API
         "locationId": location_id,
         "assignedTo": user_id
     }
 
-    # Validar datos del contacto
-    if not contact_data["firstName"] or not normalized_phone:
-        logger.warning(f"Datos de contacto inválidos para evento {event.name}: nombre={contact_data['firstName']}, teléfono={contact_data['phone']}")
-        return None
+    country_codes = ["+1", "+57"]
 
-    # Buscar contacto existente por número de teléfono
-    response = make_api_request(
-        "/contacts/",
-        access_token,
-        method="GET",
-        params={"query": raw_phone, "locationId": location_id},
-        headers={"Version": "2021-07-28"}
-    )
-    contacts = response.get("contacts", [])
-    
-    # Filtrar contactos para coincidencia de subcadena con el número normalizado
-    matching_contacts = [
-        contact for contact in contacts
-        if normalized_phone in normalize_phone(contact.get("phone", ""))
-        and len(normalize_phone(contact.get("phone", ""))) >= len(normalized_phone)
-    ]
+    contact_id = None
+    matched_phone = None
 
-    if matching_contacts:
-        contact = matching_contacts[0]
-        contact_id = contact.get("id")
-        current_assigned_to = contact.get("assignedTo", "")
-        
-        # Verificar si el assignedTo cambió
-        if current_assigned_to and current_assigned_to != user_id:
-            logger.warning(f"Cambio de usuario asignado para contacto {contact_id} (teléfono: {contact_data['phone']}): de {current_assigned_to} a {user_id}")
+    for code in country_codes:
+        search_phone = normalize_phone(base_phone, code)
+        logger.info(f"Buscando contacto con teléfono: {search_phone}")
 
-        # Actualizar contacto existente con firstName, phone y assignedTo
-        update_data = {
-            "firstName": contact_data["firstName"],
-            "phone": contact_data["phone"],
-            "assignedTo": user_id
-        }
-        response = make_api_request(
-            f"/contacts/{contact_id}",
-            access_token,
-            method="PUT",
-            json_data=update_data,
-            headers={"Version": "2021-07-28"}
-        )
-        if response.get("error"):
-            logger.error(f"Error actualizando contacto {contact_id} para evento {event.name}: {response['error']}")
-            return None
-        logger.info(f"Contacto actualizado para evento {event.name}: ID={contact_id}, assignedTo={user_id}")
-        return contact_id
-    else:
-        # Crear nuevo contacto
         response = make_api_request(
             "/contacts/",
             access_token,
-            method="POST",
-            json_data=contact_data,
+            method="GET",
+            params={"query": search_phone, "locationId": location_id},
             headers={"Version": "2021-07-28"}
         )
-        contact_id = response.get("contact", {}).get("id")
-        if contact_id:
-            logger.info(f"Contacto creado para evento {event.name}: ID={contact_id}, assignedTo={user_id}")
+        contacts = response.get("contacts", [])
+
+        matching_contacts = [
+            contact for contact in contacts
+            if normalize_phone(contact.get("phone", ""), code) == search_phone
+        ]
+
+        if matching_contacts:
+            contact = matching_contacts[0]
+            contact_id = contact.get("id")
+            matched_phone = search_phone
+            current_assigned_to = contact.get("assignedTo", "")
+
+            if current_assigned_to and current_assigned_to != user_id:
+                logger.warning(f"Cambio de usuario asignado para contacto {contact_id} (teléfono: {matched_phone}): de {current_assigned_to} a {user_id}")
+
+            update_data = {
+                "firstName": contact_data["firstName"],
+                "phone": matched_phone,
+                "assignedTo": user_id
+            }
+            response = make_api_request(
+                f"/contacts/{contact_id}",
+                access_token,
+                method="PUT",
+                json_data=update_data,
+                headers={"Version": "2021-07-28"}
+            )
+            if response.get("error"):
+                logger.error(f"Error actualizando contacto {contact_id} para evento {event.name}: {response['error']}")
+                return None
+            logger.info(f"Contacto actualizado para evento {event.name}: ID={contact_id}, teléfono={matched_phone}, assignedTo={user_id}")
             return contact_id
         else:
-            logger.error(f"No se pudo crear contacto para evento {event.name}: {response.get('error', 'Sin ID')}")
-            return None
+            logger.info(f"No se encontraron contactos con teléfono: {search_phone}")
+
+    new_phone = normalize_phone(base_phone, "+1")
+    contact_data["phone"] = new_phone
+
+    response = make_api_request(
+        "/contacts/",
+        access_token,
+        method="POST",
+        json_data=contact_data,
+        headers={"Version": "2021-07-28"}
+    )
+    contact_id = response.get("contact", {}).get("id")
+    if contact_id:
+        logger.info(f"Contacto creado para evento {event.name}: ID={contact_id}, teléfono={new_phone}, assignedTo={user_id}")
+        return contact_id
+    else:
+        logger.error(f"No se pudo crear contacto para evento {event.name}: {response.get('error', 'Sin ID')}")
+        return None
 
 def insert_event_in_ghl_calendar(doc, method=None):
     """Insert event in GHL calendar."""
