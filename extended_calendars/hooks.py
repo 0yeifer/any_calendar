@@ -196,6 +196,10 @@ doc_events = {
 # override_whitelisted_methods = {
 # 	"frappe.desk.doctype.event.event.get_events": "extended_calendars.event.get_events"
 # }
+override_whitelisted_methods = {
+	"frappe.integrations.doctype.google_calendar.google_calendar.authorize_access": "extended_calendars.overrides.google_calendar.custom_google_calendar.authorize_access",
+    "frappe.integrations.doctype.google_calendar.google_calendar.google_callback": "extended_calendars.overrides.google_calendar.custom_google_calendar.google_callback",
+}
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
