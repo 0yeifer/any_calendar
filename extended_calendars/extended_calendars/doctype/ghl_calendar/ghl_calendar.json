@@ -79,7 +79,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
+   "default": "1",
    "fieldname": "pull",
    "fieldtype": "Check",
    "label": "Pull"
@@ -89,7 +89,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
+   "default": "1",
    "fieldname": "push",
    "fieldtype": "Check",
    "label": "Push"
@@ -97,7 +97,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-04-21 10:30:45.935918",
+ "modified": "2025-05-30 15:27:08.423717",
  "modified_by": "Administrator",
  "module": "Extended Calendars",
  "name": "GHL Calendar",
