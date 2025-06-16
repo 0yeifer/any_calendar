@@ -1,5 +1,6 @@
 import frappe
 import requests
+from frappe import _
 from urllib.parse import quote
 from frappe.integrations.google_oauth import GoogleOAuth
 from frappe.integrations.doctype.google_calendar.google_calendar import (
