@@ -1,0 +1,122 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-06-17 14:26:22.184851",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_nbtv",
+  "column_break_knhg",
+  "naming_series",
+  "section_break_btgx",
+  "column_break_oiny",
+  "calendar_name",
+  "calendar_id",
+  "column_break_ybas",
+  "access_token",
+  "cookie_value",
+  "section_break_eswv",
+  "column_break_njgf",
+  "pull",
+  "column_break_nbpq",
+  "push"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_nbtv",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_knhg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "EXT-CAL-GOUJANA-.#######"
+  },
+  {
+   "fieldname": "column_break_oiny",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "calendar_name",
+   "fieldtype": "Data",
+   "label": "Calendar Name"
+  },
+  {
+   "fieldname": "section_break_eswv",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_njgf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "pull",
+   "fieldtype": "Check",
+   "label": "Pull"
+  },
+  {
+   "fieldname": "section_break_btgx",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_ybas",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "access_token",
+   "fieldtype": "Data",
+   "label": "Access Token"
+  },
+  {
+   "fieldname": "calendar_id",
+   "fieldtype": "Data",
+   "label": "Calendar Id"
+  },
+  {
+   "fieldname": "cookie_value",
+   "fieldtype": "Data",
+   "label": "Cookie Value"
+  },
+  {
+   "fieldname": "column_break_nbpq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "push",
+   "fieldtype": "Check",
+   "label": "Push"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-06-17 14:36:26.784282",
+ "modified_by": "Administrator",
+ "module": "Extended Calendars",
+ "name": "Goujana Calendar",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
