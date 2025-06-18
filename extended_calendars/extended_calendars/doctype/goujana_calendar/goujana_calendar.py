@@ -235,6 +235,26 @@ def sync(doc_name=None):
         error_msg = f"Error en sync goujana calendar: {str(e)}"
         frappe.log_error("Goujana Calendar Sync Error", error_msg)
         return {"success": False, "message": error_msg}
+
+@frappe.whitelist()
+def sync_all_goujana_calendars():
+    """Sincronización de todos los calendarios de Goujana Calendar."""
+    try:
+        calendars = frappe.get_all("Goujana Calendar", fields=["name"])
+        results = []
+        
+        for calendar in calendars:
+            result = sync(doc_name=calendar.name)
+            results.append(result)
+        
+        frappe.log_error("Goujana Calendar Sync All", f"Calendars Synced: {len(results)}")
+        
+        return {"success": True, "results": results}
+    
+    except Exception as e:
+        error_msg = f"Error en sync_all_calendars: {str(e)}"
+        frappe.log_error("Goujana Calendar Sync All Error", error_msg)
+        return {"success": False, "message": error_msg}
     
 @frappe.whitelist()
 def test_insert(doc_name=None):
