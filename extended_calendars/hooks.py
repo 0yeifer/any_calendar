@@ -185,6 +185,14 @@ doc_events = {
 # 	],
 # }
 
+scheduler_events = {
+    "cron": {
+        "* * * * *": [
+            "extended_calendars.extended_calendars.doctype.goujana_calendar.goujana_calendar.sync_all_goujana_calendars"
+        ]
+    }
+}
+
 # Testing
 # -------
 

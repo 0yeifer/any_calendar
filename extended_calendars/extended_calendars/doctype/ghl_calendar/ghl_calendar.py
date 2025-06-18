@@ -27,6 +27,7 @@ class GHLCalendar(Document):
             frappe.throw(_("Los campos location_id, access_token y calendar_id son requeridos"))
         return {"location_id": self.location_id, "access_token": self.access_token, "calendar_id": self.calendar_id}
 
+#TODO: Check if is really needed
 def with_ghl_config(func):
     """Decorador para obtener configuración de GHL Calendar y añadir depuración."""
     @wraps(func)
