@@ -55,7 +55,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
+   "default": "1",
    "fieldname": "pull",
    "fieldtype": "Check",
    "label": "Pull"
@@ -80,7 +80,7 @@
   },
   {
    "fieldname": "cookie_value",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "Cookie Value"
   },
   {
@@ -88,7 +88,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
+   "default": "1",
    "fieldname": "push",
    "fieldtype": "Check",
    "label": "Push"
@@ -96,7 +96,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-17 14:36:26.784282",
+ "modified": "2025-06-17 16:57:58.459732",
  "modified_by": "Administrator",
  "module": "Extended Calendars",
  "name": "Goujana Calendar",
