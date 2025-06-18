@@ -247,8 +247,6 @@ def sync_all_goujana_calendars():
             result = sync(doc_name=calendar.name)
             results.append(result)
         
-        frappe.log_error("Goujana Calendar Sync All", f"Calendars Synced: {len(results)}")
-        
         return {"success": True, "results": results}
     
     except Exception as e:
