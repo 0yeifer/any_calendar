@@ -1,7 +1,7 @@
 app_name = "extended_calendars"
-app_title = "Extended Calendars"
+app_title = "Any Calendar"
 app_publisher = "Yeifer"
-app_description = "Extended Calendars Hubsptot, GHL y google calendars"
+app_description = "Syncing and managing events from any calendar provider"
 app_email = "developer@yeifer.co"
 app_license = "mit"
 
@@ -15,7 +15,7 @@ app_license = "mit"
 # 	{
 # 		"name": "any_calendar",
 # 		"logo": "/assets/any_calendar/logo.png",
-# 		"title": "Extended Calendars",
+# 		"title": "Any Calendar",
 # 		"route": "/any_calendar",
 # 		"has_permission": "any_calendar.api.permission.has_app_permission"
 # 	}

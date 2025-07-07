@@ -3,7 +3,7 @@ name = "extended_calendars"
 authors = [
     { name = "Yeifer", email = "developer@yeifer.co"}
 ]
-description = "Extended Calendars Hubsptot, GHL y google calendars"
+description = "Syncing and managing events from any calendar provider"
 requires-python = ">=3.10"
 readme = "README.md"
 dynamic = ["version"]
