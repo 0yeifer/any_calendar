@@ -2,80 +2,56 @@
  "actions": [],
  "allow_rename": 1,
  "autoname": "naming_series:",
- "creation": "2025-04-21 10:25:25.867778",
+ "creation": "2025-06-17 14:26:22.184851",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "section_break_pqxz",
-  "column_break_uash",
+  "section_break_nbtv",
+  "column_break_knhg",
   "naming_series",
-  "section_break_abyr",
-  "column_break_iqnm",
+  "section_break_btgx",
+  "column_break_oiny",
   "calendar_name",
   "calendar_id",
-  "column_break_qvas",
+  "column_break_ybas",
   "access_token",
-  "location_id",
-  "section_break_evcu",
-  "column_break_hgcv",
+  "cookie_value",
+  "section_break_eswv",
+  "column_break_njgf",
   "pull",
-  "column_break_iqho",
+  "column_break_nbpq",
   "push"
  ],
  "fields": [
   {
-   "fieldname": "section_break_pqxz",
+   "fieldname": "section_break_nbtv",
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "column_break_uash",
+   "fieldname": "column_break_knhg",
    "fieldtype": "Column Break"
   },
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Naming Series",
-   "options": "EXT-CAL-GHL-.#######"
+   "options": "EXT-CAL-GOUJANA-.#######"
   },
   {
-   "fieldname": "section_break_abyr",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "column_break_iqnm",
+   "fieldname": "column_break_oiny",
    "fieldtype": "Column Break"
   },
   {
    "fieldname": "calendar_name",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "Calendar Name"
   },
   {
-   "fieldname": "calendar_id",
-   "fieldtype": "Data",
-   "label": "Calendar Id"
-  },
-  {
-   "fieldname": "column_break_qvas",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "access_token",
-   "fieldtype": "Data",
-   "label": "Access Token"
-  },
-  {
-   "fieldname": "location_id",
-   "fieldtype": "Data",
-   "label": "Location Id"
-  },
-  {
-   "fieldname": "section_break_evcu",
+   "fieldname": "section_break_eswv",
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "column_break_hgcv",
+   "fieldname": "column_break_njgf",
    "fieldtype": "Column Break"
   },
   {
@@ -85,7 +61,30 @@
    "label": "Pull"
   },
   {
-   "fieldname": "column_break_iqho",
+   "fieldname": "section_break_btgx",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_ybas",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "access_token",
+   "fieldtype": "Data",
+   "label": "Access Token"
+  },
+  {
+   "fieldname": "calendar_id",
+   "fieldtype": "Data",
+   "label": "Calendar Id"
+  },
+  {
+   "fieldname": "cookie_value",
+   "fieldtype": "Small Text",
+   "label": "Cookie Value"
+  },
+  {
+   "fieldname": "column_break_nbpq",
    "fieldtype": "Column Break"
   },
   {
@@ -97,10 +96,10 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-05-30 15:27:08.423717",
+ "modified": "2025-06-18 01:21:36.963240",
  "modified_by": "Administrator",
  "module": "Extended Calendars",
- "name": "GHL Calendar",
+ "name": "Goujana Calendar",
  "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
