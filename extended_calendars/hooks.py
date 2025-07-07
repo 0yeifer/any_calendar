@@ -13,11 +13,11 @@ app_license = "mit"
 # Each item in the list will be shown as an app in the apps page
 # add_to_apps_screen = [
 # 	{
-# 		"name": "extended_calendars",
-# 		"logo": "/assets/extended_calendars/logo.png",
+# 		"name": "any_calendar",
+# 		"logo": "/assets/any_calendar/logo.png",
 # 		"title": "Extended Calendars",
-# 		"route": "/extended_calendars",
-# 		"has_permission": "extended_calendars.api.permission.has_app_permission"
+# 		"route": "/any_calendar",
+# 		"has_permission": "any_calendar.api.permission.has_app_permission"
 # 	}
 # ]
 
@@ -25,15 +25,15 @@ app_license = "mit"
 # ------------------
 
 # include js, css files in header of desk.html
-# app_include_css = "/assets/extended_calendars/css/extended_calendars.css"
-# app_include_js = "/assets/extended_calendars/js/extended_calendars.js"
+# app_include_css = "/assets/any_calendar/css/any_calendar.css"
+# app_include_js = "/assets/any_calendar/js/any_calendar.js"
 
 # include js, css files in header of web template
-# web_include_css = "/assets/extended_calendars/css/extended_calendars.css"
-# web_include_js = "/assets/extended_calendars/js/extended_calendars.js"
+# web_include_css = "/assets/any_calendar/css/any_calendar.css"
+# web_include_js = "/assets/any_calendar/js/any_calendar.js"
 
 # include custom scss in every website theme (without file extension ".scss")
-# website_theme_scss = "extended_calendars/public/scss/website"
+# website_theme_scss = "any_calendar/public/scss/website"
 
 # include js, css files in header of web form
 # webform_include_js = {"doctype": "public/js/doctype.js"}
@@ -56,7 +56,7 @@ doctype_js = {
 # Svg Icons
 # ------------------
 # include app icons in desk
-# app_include_icons = "extended_calendars/public/icons.svg"
+# app_include_icons = "any_calendar/public/icons.svg"
 
 # Home Pages
 # ----------
@@ -80,43 +80,43 @@ doctype_js = {
 
 # add methods and filters to jinja environment
 # jinja = {
-# 	"methods": "extended_calendars.utils.jinja_methods",
-# 	"filters": "extended_calendars.utils.jinja_filters"
+# 	"methods": "any_calendar.utils.jinja_methods",
+# 	"filters": "any_calendar.utils.jinja_filters"
 # }
 
 # Installation
 # ------------
 
-# before_install = "extended_calendars.install.before_install"
-# after_install = "extended_calendars.install.after_install"
+# before_install = "any_calendar.install.before_install"
+# after_install = "any_calendar.install.after_install"
 
 # Uninstallation
 # ------------
 
-# before_uninstall = "extended_calendars.uninstall.before_uninstall"
-# after_uninstall = "extended_calendars.uninstall.after_uninstall"
+# before_uninstall = "any_calendar.uninstall.before_uninstall"
+# after_uninstall = "any_calendar.uninstall.after_uninstall"
 
 # Integration Setup
 # ------------------
 # To set up dependencies/integrations with other apps
 # Name of the app being installed is passed as an argument
 
-# before_app_install = "extended_calendars.utils.before_app_install"
-# after_app_install = "extended_calendars.utils.after_app_install"
+# before_app_install = "any_calendar.utils.before_app_install"
+# after_app_install = "any_calendar.utils.after_app_install"
 
 # Integration Cleanup
 # -------------------
 # To clean up dependencies/integrations with other apps
 # Name of the app being uninstalled is passed as an argument
 
-# before_app_uninstall = "extended_calendars.utils.before_app_uninstall"
-# after_app_uninstall = "extended_calendars.utils.after_app_uninstall"
+# before_app_uninstall = "any_calendar.utils.before_app_uninstall"
+# after_app_uninstall = "any_calendar.utils.after_app_uninstall"
 
 # Desk Notifications
 # ------------------
 # See frappe.core.notifications.get_notification_config
 
-# notification_config = "extended_calendars.notifications.get_notification_config"
+# notification_config = "any_calendar.notifications.get_notification_config"
 
 # Permissions
 # -----------
@@ -163,25 +163,25 @@ doc_events = {
     }
 }
 
-# /workspace/development/frappe-bench/apps/extended_calendars/extended_calendars/extended_calendars/doctype/calendar_hubspot/calendar_hubspot.py
+# /workspace/development/frappe-bench/apps/any_calendar/any_calendar/any_calendar/doctype/calendar_hubspot/calendar_hubspot.py
 # Scheduled Tasks
 # ---------------
 
 # scheduler_events = {
 # 	"all": [
-# 		"extended_calendars.tasks.all"
+# 		"any_calendar.tasks.all"
 # 	],
 # 	"daily": [
-# 		"extended_calendars.tasks.daily"
+# 		"any_calendar.tasks.daily"
 # 	],
 # 	"hourly": [
-# 		"extended_calendars.tasks.hourly"
+# 		"any_calendar.tasks.hourly"
 # 	],
 # 	"weekly": [
-# 		"extended_calendars.tasks.weekly"
+# 		"any_calendar.tasks.weekly"
 # 	],
 # 	"monthly": [
-# 		"extended_calendars.tasks.monthly"
+# 		"any_calendar.tasks.monthly"
 # 	],
 # }
 
@@ -196,13 +196,13 @@ scheduler_events = {
 # Testing
 # -------
 
-# before_tests = "extended_calendars.install.before_tests"
+# before_tests = "any_calendar.install.before_tests"
 
 # Overriding Methods
 # ------------------------------
 #
 # override_whitelisted_methods = {
-# 	"frappe.desk.doctype.event.event.get_events": "extended_calendars.event.get_events"
+# 	"frappe.desk.doctype.event.event.get_events": "any_calendar.event.get_events"
 # }
 override_whitelisted_methods = {
 	"frappe.integrations.doctype.google_calendar.google_calendar.authorize_access": "extended_calendars.overrides.google_calendar.custom_google_calendar.authorize_access",
@@ -213,7 +213,7 @@ override_whitelisted_methods = {
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
 # override_doctype_dashboards = {
-# 	"Task": "extended_calendars.task.get_dashboard_data"
+# 	"Task": "any_calendar.task.get_dashboard_data"
 # }
 
 # exempt linked doctypes from being automatically cancelled
@@ -227,13 +227,13 @@ override_whitelisted_methods = {
 
 # Request Events
 # ----------------
-# before_request = ["extended_calendars.utils.before_request"]
-# after_request = ["extended_calendars.utils.after_request"]
+# before_request = ["any_calendar.utils.before_request"]
+# after_request = ["any_calendar.utils.after_request"]
 
 # Job Events
 # ----------
-# before_job = ["extended_calendars.utils.before_job"]
-# after_job = ["extended_calendars.utils.after_job"]
+# before_job = ["any_calendar.utils.before_job"]
+# after_job = ["any_calendar.utils.after_job"]
 
 # User Data Protection
 # --------------------
@@ -263,7 +263,7 @@ override_whitelisted_methods = {
 # --------------------------------
 
 # auth_hooks = [
-# 	"extended_calendars.auth.validate"
+# 	"any_calendar.auth.validate"
 # ]
 
 # Automatically update python controller files with type annotations for this app.
