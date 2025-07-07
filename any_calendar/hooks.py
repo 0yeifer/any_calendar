@@ -1,4 +1,4 @@
-app_name = "extended_calendars"
+app_name = "any_calendar"
 app_title = "Any Calendar"
 app_publisher = "Yeifer"
 app_description = "Syncing and managing events from any calendar provider"
@@ -139,8 +139,8 @@ doctype_js = {
 # }
 
 override_doctype_class = {
-    "Event": "extended_calendars.overrides.event.custom_event.CustomEvent",
-    "Contact": "extended_calendars.overrides.contact.custom_contact.CustomContact"
+    "Event": "any_calendar.overrides.event.custom_event.CustomEvent",
+    "Contact": "any_calendar.overrides.contact.custom_contact.CustomContact"
 }
 
 # Document Events
@@ -157,9 +157,9 @@ override_doctype_class = {
 
 doc_events = {
     "Event": {
-        "after_insert": "extended_calendars.utils.insert_event_in_calendar_provider",
-        "on_update": "extended_calendars.utils.update_event_in_calendar_provider",
-        "on_trash": "extended_calendars.utils.delete_event_in_calendar_provider",
+        "after_insert": "any_calendar.utils.insert_event_in_calendar_provider",
+        "on_update": "any_calendar.utils.update_event_in_calendar_provider",
+        "on_trash": "any_calendar.utils.delete_event_in_calendar_provider",
     }
 }
 
@@ -188,7 +188,7 @@ doc_events = {
 scheduler_events = {
     "cron": {
         "* * * * *": [
-            "extended_calendars.extended_calendars.doctype.goujana_calendar.goujana_calendar.sync_all_goujana_calendars"
+            "any_calendar.any_calendar.doctype.goujana_calendar.goujana_calendar.sync_all_goujana_calendars"
         ]
     }
 }
@@ -205,8 +205,8 @@ scheduler_events = {
 # 	"frappe.desk.doctype.event.event.get_events": "any_calendar.event.get_events"
 # }
 override_whitelisted_methods = {
-	"frappe.integrations.doctype.google_calendar.google_calendar.authorize_access": "extended_calendars.overrides.google_calendar.custom_google_calendar.authorize_access",
-    "frappe.integrations.doctype.google_calendar.google_calendar.google_callback": "extended_calendars.overrides.google_calendar.custom_google_calendar.google_callback",
+	"frappe.integrations.doctype.google_calendar.google_calendar.authorize_access": "any_calendar.overrides.google_calendar.custom_google_calendar.authorize_access",
+    "frappe.integrations.doctype.google_calendar.google_calendar.google_callback": "any_calendar.overrides.google_calendar.custom_google_calendar.google_callback",
 }
 #
 # each overriding function accepts a `data` argument;

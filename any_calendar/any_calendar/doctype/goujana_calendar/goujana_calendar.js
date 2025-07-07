@@ -30,7 +30,7 @@ frappe.ui.form.on("Goujana Calendar", {
                         }
                     }, time_interval);
                     frappe.call({
-                        method: "extended_calendars.extended_calendars.doctype.goujana_calendar.goujana_calendar.sync",
+                        method: "any_calendar.any_calendar.doctype.goujana_calendar.goujana_calendar.sync",
                         args: {
                             doc_name: frm.doc.name
                         },

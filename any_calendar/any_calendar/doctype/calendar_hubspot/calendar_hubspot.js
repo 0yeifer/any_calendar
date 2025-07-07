@@ -40,7 +40,7 @@ frappe.ui.form.on('Calendar Hubspot', {
                         }
                     }, time_interval);
                     frappe.call({
-                        method: 'extended_calendars.extended_calendars.doctype.calendar_hubspot.calendar_hubspot.sync_hubspot_data',
+                        method: 'any_calendar.any_calendar.doctype.calendar_hubspot.calendar_hubspot.sync_hubspot_data',
                         args: { hubspot_doc: frm.doc.name },
                         callback: function(r) {
                             clearInterval(progress_interval);

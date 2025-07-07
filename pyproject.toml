@@ -1,5 +1,5 @@
 [project]
-name = "extended_calendars"
+name = "any_calendar"
 authors = [
     { name = "Yeifer", email = "developer@yeifer.co"}
 ]

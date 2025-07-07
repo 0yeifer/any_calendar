@@ -31,7 +31,7 @@ frappe.ui.form.on("GHL Calendar", {
                         }
                     }, time_interval);
                     frappe.call({
-                        method: "extended_calendars.extended_calendars.doctype.ghl_calendar.ghl_calendar.sync_ghl_data",
+                        method: "any_calendar.any_calendar.doctype.ghl_calendar.ghl_calendar.sync_ghl_data",
                         args: {
                             doc_name: frm.doc.name
                         },

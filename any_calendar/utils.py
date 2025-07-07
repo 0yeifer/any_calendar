@@ -1,15 +1,15 @@
 import frappe
-from extended_calendars.extended_calendars.doctype.calendar_hubspot.calendar_hubspot import (
+from any_calendar.any_calendar.doctype.calendar_hubspot.calendar_hubspot import (
     insert_event_in_calendar_hubspot,
     update_event_in_calendar_hubspot,
     delete_event_in_calendar_hubspot
 )
-from extended_calendars.extended_calendars.doctype.ghl_calendar.ghl_calendar import (
+from any_calendar.any_calendar.doctype.ghl_calendar.ghl_calendar import (
     insert_event_in_ghl_calendar,
     update_event_in_ghl_calendar,
     delete_event_in_ghl_calendar
 )
-from extended_calendars.extended_calendars.doctype.goujana_calendar.goujana_calendar import (
+from any_calendar.any_calendar.doctype.goujana_calendar.goujana_calendar import (
     insert_event_in_goujana_calendar,
 )
 
